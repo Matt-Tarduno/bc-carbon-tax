@@ -1,7 +1,7 @@
 
 # prelims:
 # $pip3 install requests (required download, move files to current directory)
-# pip install pdfminer (requires download, move file to current directory)
+# $pip install pdfminer (requires download, move file to current directory)
 
 from socket import timeout
 import logging
@@ -11,6 +11,9 @@ import csv
 
 
 def load_sensors(filename):
+	'''
+	A helper function
+	'''
 	with open(filename, 'r') as f:
 		reader = csv.reader(f)
 		l=list(reader)
@@ -18,6 +21,9 @@ def load_sensors(filename):
 
 
 def save(url):
+	'''
+	Uses requests lib to get info in url
+	'''
 	response = requests.get(url)
 	with open('tmp.pdf', 'wb') as f:
 		f.write(response.content)
@@ -25,20 +31,19 @@ def save(url):
 def matchcondition(the_string):
 	return not any(c.isalpha() for c in the_string) and "." in the_string and "-" not in the_string
 
-def scrape():
-	#clear output csv
+def scrape(sensor_list):
+	'''
+	Scrapes data from BC Ministry of Transportation website.
+	Use "speed_sensors.csv" as input.
+	'''
 	filename = "output.csv"
 	f = open(filename, "w+")
 	f.close()
 
-	sensor_list=load_sensors('speed_sensors_test.csv')
+	sensor_list=load_sensors(sensor_list)
 	sensor_list=sensor_list[1::2] #deals with duplicates
 
-	'''
-	pass this a list of triples [[sensor_name, tmp, siteno],...
-	'''
-
-	for sensor in sensor_list: 
+	for sensor in sensor_list:
 		sensor_name=sensor[0]
 		print(sensor_name)
 		tmp=sensor[1]
@@ -60,17 +65,17 @@ def scrape():
 					url="http://www.th.gov.bc.ca/trafficData/TRADAS/reports/AllYears/" + year + "/" + month + "/DS01/DS01%20-%20Site%20" + sensor_name +"%20-%20" + tmp + "%20-%20N%20on%20" + month + "-" + day + "-" + year +".pdf"
 					try:
 						response = requests.get(url, timeout=1) #try to get url, of not (connection error) print error, continue
-						if response.status_code==200: #if website is valid 
+						if response.status_code==200: #if website is valid
 							save(url) #calls save function defined above
 
-							try: 
+							try:
 								out=subprocess.check_output(['pdf2txt.py','tmp.pdf']) #obtain text (subprocess calls to command liner)
-								string=str(out) 
+								string=str(out)
 								words=string.split("\\n") #split based on newline
 								tardunos_generator=(x for x in words if matchcondition(x)) #used in finding mean/median from soup
 
 								#identify the first float in stream (mean) and the second (median)
-								try: 	
+								try:
 									mean=next(tardunos_generator)
 								except StopIteration:
 									pass
