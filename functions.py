@@ -1,7 +1,11 @@
 
 # prelims:
 # $pip3 install requests (required download, move files to current directory)
+<<<<<<< HEAD
 # pip install pdfminer (requires download, move file to current directory)
+=======
+# $pip install pdfminer (requires download, move file to current directory)
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 
 from socket import timeout
 import logging
@@ -11,6 +15,12 @@ import csv
 
 
 def load_sensors(filename):
+<<<<<<< HEAD
+=======
+	'''
+	A helper function
+	'''
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 	with open(filename, 'r') as f:
 		reader = csv.reader(f)
 		l=list(reader)
@@ -18,6 +28,12 @@ def load_sensors(filename):
 
 
 def save(url):
+<<<<<<< HEAD
+=======
+	'''
+	Uses requests lib to get info in url
+	'''
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 	response = requests.get(url)
 	with open('tmp.pdf', 'wb') as f:
 		f.write(response.content)
@@ -25,12 +41,21 @@ def save(url):
 def matchcondition(the_string):
 	return not any(c.isalpha() for c in the_string) and "." in the_string and "-" not in the_string
 
+<<<<<<< HEAD
 def scrape():
 	#clear output csv
+=======
+def scrape(sensor_list):
+	'''
+	Scrapes data from BC Ministry of Transportation website.
+	Use "speed_sensors.csv" as input.
+	'''
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 	filename = "output.csv"
 	f = open(filename, "w+")
 	f.close()
 
+<<<<<<< HEAD
 	sensor_list=load_sensors('speed_sensors_test.csv')
 	sensor_list=sensor_list[1::2] #deals with duplicates
 
@@ -39,6 +64,12 @@ def scrape():
 	'''
 
 	for sensor in sensor_list: 
+=======
+	sensor_list=load_sensors(sensor_list)
+	sensor_list=sensor_list[1::2] #deals with duplicates
+
+	for sensor in sensor_list:
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 		sensor_name=sensor[0]
 		print(sensor_name)
 		tmp=sensor[1]
@@ -60,17 +91,30 @@ def scrape():
 					url="http://www.th.gov.bc.ca/trafficData/TRADAS/reports/AllYears/" + year + "/" + month + "/DS01/DS01%20-%20Site%20" + sensor_name +"%20-%20" + tmp + "%20-%20N%20on%20" + month + "-" + day + "-" + year +".pdf"
 					try:
 						response = requests.get(url, timeout=1) #try to get url, of not (connection error) print error, continue
+<<<<<<< HEAD
 						if response.status_code==200: #if website is valid 
 							save(url) #calls save function defined above
 
 							try: 
 								out=subprocess.check_output(['pdf2txt.py','tmp.pdf']) #obtain text (subprocess calls to command liner)
 								string=str(out) 
+=======
+						if response.status_code==200: #if website is valid
+							save(url) #calls save function defined above
+
+							try:
+								out=subprocess.check_output(['pdf2txt.py','tmp.pdf']) #obtain text (subprocess calls to command liner)
+								string=str(out)
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 								words=string.split("\\n") #split based on newline
 								tardunos_generator=(x for x in words if matchcondition(x)) #used in finding mean/median from soup
 
 								#identify the first float in stream (mean) and the second (median)
+<<<<<<< HEAD
 								try: 	
+=======
+								try:
+>>>>>>> 206be7e9084ab190f3cb8ab1c0d6aa7a6e14c5ae
 									mean=next(tardunos_generator)
 								except StopIteration:
 									pass
