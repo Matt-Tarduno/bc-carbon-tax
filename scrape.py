@@ -1,7 +1,10 @@
 
-# prelims:
-# $pip3 install requests (required download, move files to current directory)
-# pip install pdfminer (requires download, move file to current directory)
+# to run from command line
+# 	$pip3 install requests (required download, move files to current directory)
+# 	$pip install pdfminer (requires download, move file to current directory)
+# 	$python3
+# 	>>>import scrape
+# 	>>>scrape.scrape()
 
 from socket import timeout
 import logging
@@ -49,6 +52,10 @@ def scrape():
 				for day in range (1,31):
 					mean="none"
 					median="none"
+					mean_pos="none"
+					median_pos="none"
+					mean_neg="none"
+					median_neg="none"
 					sensor_name.replace(" ", "%20")
 					year=str(year)
 					month=str(month)
@@ -77,10 +84,22 @@ def scrape():
 								try:
 									median=next(tardunos_generator)
 								except StopIteration:
+									pass									
+								try:
+									trash=[next(tardunos_generator) for i in range(7)]
+									mean_pos=next(tardunos_generator)
+									median_pos=next(tardunos_generator)
+								except StopIteration:
+									pass									
+								try:
+									trash=[next(tardunos_generator) for i in range(7)]
+									mean_neg=next(tardunos_generator)
+									median_neg=next(tardunos_generator)
+								except StopIteration:
 									pass
 								with open("output.csv", "a") as fp:
 									wr = csv.writer(fp, dialect='excel')
-									wr.writerow([month,day,year,sensor_name,siteno,mean,median])
+									wr.writerow([month,day,year,sensor_name,siteno,mean,median,mean_pos,median_pos,mean_neg,median_neg])
 
 							except subprocess.CalledProcessError:
 								print("")
@@ -89,7 +108,7 @@ def scrape():
 
 								with open("output.csv", "a") as fp:
 									wr = csv.writer(fp, dialect='excel')
-									wr.writerow([month,day,year,sensor_name,siteno,mean,median])
+									wr.writerow([month,day,year,sensor_name,siteno,mean,median,mean_pos,median_pos,mean_pos,median_neg])
 						else:
 							pass
 					except requests.exceptions.ConnectionError as e:
