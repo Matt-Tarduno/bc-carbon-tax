@@ -1,3 +1,4 @@
+#this mostly works, might need some touchups. This exists because I don't fully trust github. 
 
 # to run from command line
 # 	$pip3 install requests (required download, move files to current directory)
@@ -11,6 +12,8 @@ import logging
 import requests
 import subprocess
 import csv
+import sys
+sys.maxsize=10000000
 
 
 def load_sensors(filename):
@@ -28,6 +31,10 @@ def save(url):
 def matchcondition(the_string):
 	return not any(c.isalpha() for c in the_string) and "." in the_string and "-" not in the_string
 
+def matchcondition_speed(the_string):
+	return "Posted Speed" in the_string
+
+
 def scrape():
 	#clear output csv
 	filename = "output.csv"
@@ -41,18 +48,16 @@ def scrape():
 	pass this a list of triples [[sensor_name, tmp, siteno],...
 	'''
 
-	#we want make a csv for each sensor, then piece them all together
-	# or maybe just create lists, or some object, and write them to output at the end of each sensor. 
-	for sensor in sensor_list:
+	for sensor in sensor_list: 
 		sensor_name=sensor[0]
 		print(sensor_name)
 		tmp=sensor[1]
 		siteno=sensor[2]
-		for year in range(2005,2010):
-			year_rows=[]
+		for year in range(2004,2010):
 			print(year)
 			for month in range(1,12):
 				for day in range (1,31):
+					speed="none"
 					mean="none"
 					median="none"
 					mean_pos="none"
@@ -90,33 +95,40 @@ def scrape():
 									pass									
 								try:
 									trash=[next(tardunos_generator) for i in range(7)]
-									mean_neg=next(tardunos_generator)
-									median_neg=next(tardunos_generator)
+									mean_pos=next(tardunos_generator)
+									median_pos=next(tardunos_generator)
 								except StopIteration:
 									pass									
 								try:
 									trash=[next(tardunos_generator) for i in range(7)]
-									mean_pos=next(tardunos_generator)
-									median_pos=next(tardunos_generator)
+									mean_neg=next(tardunos_generator)
+									median_neg=next(tardunos_generator)
 								except StopIteration:
 									pass
-								string_date=str(month)+"."+str(day)+"."+str(year)
-								year_rows.append([month,day,year,sensor_name,siteno,mean,median,mean_neg,median_neg,mean_pos,median_pos])
+								
+								#grab the speed limit, too
+								tardunos_speed_generator=(x for x in words if matchcondition_speed(x)) #used in finding mean/median from soup																
+								try: 	
+									posted_speed=next(tardunos_speed_generator)
+									speed=[int(s) for s in posted_speed.split() if s.isdigit()][0] #extract number
+								except StopIteration:
+									pass
+
+								with open("output.csv", "a") as fp:
+									wr = csv.writer(fp, dialect='excel')
+									wr.writerow([month,day,year,sensor_name,siteno,mean,median,mean_pos,median_pos,mean_neg,median_neg, speed])
 
 							except subprocess.CalledProcessError:
 								print("")
 								print("error")
 								print(month, "-", day, year)
 
-								string_date=str(month)+"."+str(day)+"."+str(year)
-								year_rows.append([month,day,year,sensor_name,siteno,mean,median,mean_neg,median_neg,mean_pos,median_pos])								
+								with open("output.csv", "a") as fp:
+									wr = csv.writer(fp, dialect='excel')
+									wr.writerow([month,day,year,sensor_name,siteno,mean,median,mean_pos,median_pos,mean_pos,median_neg, speed])
 						else:
 							pass
 					except requests.exceptions.ConnectionError as e:
 						print (e)
-
-			with open("output.csv", "a") as fp:
-				wr = csv.writer(fp)
-				for date in year_rows:
-					wr.writerow(date)
-
+					except requests.exceptions.ReadTimeout as er:
+						print (er)		
