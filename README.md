@@ -1,7 +1,9 @@
 
-"Driver responses to carbon taxation: evidence from British Columbia"
+British Columbia Traffic Data
+
 ====================================================================
 
 
-This repo contains code used to scrape Brithish Columbia's Ministry of Transportation site, as well as the stata that can be used to reproduce our results. 
+This repo contains code used to scrape British Columbia's Ministry of Transportation site for daily average traffic speeds. 
+
 
